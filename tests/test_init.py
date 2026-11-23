@@ -304,6 +304,15 @@ async def test_diagnostics_redact_private_data(
     for secret in ("correct-horse", "owner@example.com", "Alex Example", "Example Way"):
         assert secret not in text
     assert diagnostics["entry"]["data"]["password"] == "**REDACTED**"
+    assert diagnostics["entry"]["data"]["host"] == "**REDACTED**"
+    assert HOST not in text
+    # Dates are plain strings, not serialized Python objects.
+    snapshot = diagnostics["stays"][LISTING_ID]
+    assert snapshot["calendar_end"] == "2026-09-08"
+    assert snapshot["stays"][0]["check_in_date"] == "2026-06-08"
+    assert snapshot["days"][0]["day"] == "2026-06-08"
+    assert snapshot["listing"]["check_in_time"] == "16:00:00"
+    assert "__type" not in text
     assert diagnostics["portal_settings"] == {
         "showInbox": True,
         "netRentalIncome": True,

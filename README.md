@@ -184,11 +184,12 @@ stay sensors change at the exact moment, in the property's own timezone.
   names appear only if your portal shows them.
 - **Reservation events start after setup.** Bookings that already exist when
   Home Assistant starts are the baseline and do not fire an event.
-- **Far-off bookings can be announced late or not at all.** The portal's
-  reservation list sometimes leaves a booking out. Such a booking becomes known
-  when its check-in comes within the calendar range (90 days by default), and
-  no `booked` event fires for it then because it is not new. Raise *Calendar
-  days to read ahead* if you want earlier notice.
+- **Bookings beyond the calendar range are less current.** Inside the calendar
+  range (90 days by default) stays are live. Further ahead they come from the
+  portal's reservation list, which runs days behind: a new booking can take a
+  few days to appear, and a canceled one can linger until it comes into range.
+  Raise *Calendar days to read ahead* if you want far-off bookings to be live
+  too.
 - **Check-in and check-out times are the planned ones.** They come from the
   reservation, or from the property's default times when the reservation has
   none. They are not door-lock or arrival data.

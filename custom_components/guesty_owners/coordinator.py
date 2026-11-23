@@ -39,6 +39,7 @@ from .models import (
     Statement,
     StatsData,
     Stay,
+    calendar_names_every_booking,
     merge_stays,
     stays_from_calendar,
 )
@@ -199,7 +200,15 @@ class StaysCoordinator(DataUpdateCoordinator[dict[str, ListingSnapshot]]):
         )
         return ListingSnapshot(
             listing=listing,
-            stays=merge_stays(stays_from_calendar(raw_days or [], listing), listed),
+            stays=merge_stays(
+                stays_from_calendar(raw_days or [], listing),
+                listed,
+                authoritative_until=(
+                    calendar_end
+                    if raw_days is not None and calendar_names_every_booking(raw_days)
+                    else None
+                ),
+            ),
             days=days,
             calendar_end=calendar_end if raw_days is not None else None,
             list_end=list_end if None not in (guest_list, owner_list) else None,

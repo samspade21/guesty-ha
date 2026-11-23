@@ -114,6 +114,10 @@ class FakePortal:
         # Reservations the list endpoint leaves out, as the real one has been
         # seen to do; the calendar still shows them.
         self.unlisted: set[str] = set()
+        # Canceled reservations the list endpoint still returns for a while.
+        self.stale_listed: dict[str, dict[str, Any]] = {}
+        # Some portals may not put reservation details on calendar nights.
+        self.calendar_names_bookings = True
         self.owner: dict[str, Any] = {
             "_id": OWNER_ID,
             "accountId": ACCOUNT_ID,
@@ -211,9 +215,10 @@ class FakePortal:
                 kind = "o" if owner else "b"
                 blocks[kind] = True
                 status = "unavailable" if owner else "booked"
-                refs.append(
-                    {"type": kind, "reservationId": raw["_id"], "reservation": raw}
-                )
+                ref = {"type": kind, "reservationId": raw["_id"]}
+                if self.calendar_names_bookings:
+                    ref["reservation"] = raw
+                refs.append(ref)
             days.append(
                 {
                     "date": day.isoformat(),
@@ -233,7 +238,7 @@ class FakePortal:
         owner = query["reservationType"] == "owner"
         items = [
             listed(raw)
-            for raw in self.reservations.values()
+            for raw in (*self.reservations.values(), *self.stale_listed.values())
             if ("ownerId" in raw) is owner
             and raw["_id"] not in self.unlisted
             # Guest stays vanish from this list once they have started.

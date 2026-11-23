@@ -11,6 +11,7 @@ from custom_components.guesty_owners.models import (
     ReviewSummary,
     Statement,
     Stay,
+    calendar_names_every_booking,
     merge_stays,
     source_label,
     stays_from_calendar,
@@ -133,6 +134,39 @@ def test_calendar_and_list_views_merge() -> None:
     # The list knows about pets, the calendar about money; merging keeps both.
     assert merged[0].pets == 1
     assert merged[0].host_payout == 500.0
+
+
+def test_merge_drops_listed_stays_the_calendar_does_not_have() -> None:
+    def stay(stay_id: str, first: date, last: date) -> Stay:
+        made = Stay.from_api(reservation(stay_id, first, last), LISTING, owner=False)
+        assert made is not None
+        return made
+
+    on_calendar = stay("real", date(2026, 6, 8), date(2026, 6, 10))
+    canceled = stay("canceled", date(2026, 6, 9), date(2026, 6, 11))
+    far = stay("far", date(2026, 12, 1), date(2026, 12, 4))
+    listed_stays = [on_calendar, canceled, far]
+
+    trusting = merge_stays({"real": on_calendar}, listed_stays)
+    assert [item.id for item in trusting] == ["real", "canceled", "far"]
+
+    checked = merge_stays(
+        {"real": on_calendar}, listed_stays, authoritative_until=date(2026, 9, 8)
+    )
+    assert [item.id for item in checked] == ["real", "far"]
+
+
+def test_calendar_names_every_booking() -> None:
+    guest = reservation(STAY_CURRENT, date(2026, 6, 8), date(2026, 6, 10))
+    named = {"blocks": {"b": True}, "blockRefs": [{"type": "b", "reservation": guest}]}
+    free = {"blocks": {"b": False, "o": False}, "blockRefs": []}
+    manual = {"blocks": {"m": True}, "blockRefs": [{"type": "m"}]}
+    anonymous = {"blocks": {"o": True}, "blockRefs": [{"type": "o"}]}
+
+    assert calendar_names_every_booking([named, free, manual])
+    assert calendar_names_every_booking([])
+    assert not calendar_names_every_booking([named, anonymous])
+    assert not calendar_names_every_booking([{"blocks": {"b": True}}])
 
 
 def _snapshot(*stays: Stay, days: tuple[CalendarDay, ...] = ()) -> ListingSnapshot:

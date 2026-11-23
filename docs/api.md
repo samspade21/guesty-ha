@@ -50,12 +50,17 @@ stays, are only visible through the calendar, where each blocked night carries
 `blockRefs[].reservation`. Owner reservations stay listed. The integration reads
 both and merges them by reservation ID.
 
-**The reservation list is not complete for upcoming stays either.** On the
-account this was observed on, the calendar showed confirmed bookings that the
-list did not return. Treat the calendar as the authority inside its date range
-and the list as a way to see further ahead. Only the calendar's reservations
-carry `createdAt`, which is what tells a new booking apart from an old one that
-has just come into range.
+**The reservation list runs days behind.** It behaves like a search index that
+is refreshed slowly. On the account this was observed on, bookings made in the
+previous few days were on the calendar but not yet in the list, and a booking
+canceled days earlier was still in the list as `confirmed` while the calendar
+had already given its nights to a newer booking. The calendar is live. The
+integration therefore treats the calendar as the authority inside its date
+range (a listed stay that the calendar does not show there is dropped) and uses
+the list only to see further ahead. It applies this only when every booked or
+owner night on the calendar carries its reservation; otherwise the list is
+believed. Only the calendar's reservations carry `createdAt`, which is what
+tells a new booking apart from an old one that has just come into range.
 
 **The reservation list needs its parameters.** `listingIds[]` and
 `reservationDateMatchType` (`checkInNightInRange` or `anyNightInRange`) are

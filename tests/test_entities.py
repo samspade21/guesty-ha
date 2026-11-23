@@ -422,3 +422,48 @@ async def test_no_cancellation_when_the_calendar_cannot_be_read(
 
     assert state(hass, f"sensor.{HOME}_upcoming_stays") == "2"
     assert state(hass, f"event.{HOME}_reservation") == STATE_UNKNOWN
+
+
+async def test_canceled_stay_lingering_in_the_list_is_dropped(
+    hass: HomeAssistant, config_entry: MockConfigEntry, portal: FakePortal
+) -> None:
+    """The list keeps returning a canceled booking; the calendar knows better."""
+    portal.stale_listed["ghost"] = reservation(
+        "ghost", date(2026, 6, 13), date(2026, 6, 16), guest="Gone Guest"
+    )
+    config_entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    stays = config_entry.runtime_data.stays.data[LISTING_ID].stays
+    assert "ghost" not in [stay.id for stay in stays]
+    assert state(hass, f"sensor.{HOME}_upcoming_stays") == "3"
+
+
+async def test_listed_stay_beyond_the_calendar_is_kept(
+    hass: HomeAssistant, config_entry: MockConfigEntry, portal: FakePortal
+) -> None:
+    """Past the calendar's range the list is all there is, so it is believed."""
+    portal.stale_listed["far-ghost"] = reservation(
+        "far-ghost", date(2026, 12, 1), date(2026, 12, 4)
+    )
+    config_entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert state(hass, f"sensor.{HOME}_upcoming_stays") == "4"
+
+
+async def test_calendar_without_reservation_details_trusts_the_list(
+    hass: HomeAssistant, config_entry: MockConfigEntry, portal: FakePortal
+) -> None:
+    """A calendar that shows booked nights but not who booked them cannot be
+    used to throw listed stays away."""
+    portal.calendar_names_bookings = False
+    config_entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    # Everything the list has: the next guest, the owner stay and November's.
+    assert state(hass, f"sensor.{HOME}_upcoming_stays") == "3"
+    assert state(hass, f"sensor.{HOME}_availability_tonight") == "booked"

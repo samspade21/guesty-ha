@@ -310,14 +310,46 @@ def stays_from_calendar(
     return stays
 
 
+def calendar_names_every_booking(raw_days: Iterable[Mapping[str, Any]]) -> bool:
+    """Return True if every booked or owner night carries its reservation.
+
+    When that holds, a reservation the calendar does not show inside its range
+    does not exist any more. A portal that hides reservation details from the
+    calendar fails this test, and then the reservation list has to be believed.
+    """
+    for raw_day in raw_days:
+        blocks = _as_dict(raw_day.get("blocks"))
+        if blocks.get("b") is not True and blocks.get("o") is not True:
+            continue
+        refs = raw_day.get("blockRefs")
+        if not isinstance(refs, list) or not any(
+            _as_dict(_as_dict(ref).get("reservation")) for ref in refs
+        ):
+            return False
+    return True
+
+
 def merge_stays(
-    primary: Mapping[str, Stay], secondary: Iterable[Stay]
+    primary: Mapping[str, Stay],
+    secondary: Iterable[Stay],
+    *,
+    authoritative_until: date | None = None,
 ) -> tuple[Stay, ...]:
-    """Combine calendar stays with listed reservations, sorted by check-in."""
+    """Combine calendar stays with listed reservations, sorted by check-in.
+
+    The reservation list is a search index that runs days behind: it misses
+    recent bookings and keeps returning canceled ones. The calendar is live. So
+    up to ``authoritative_until`` (the last day of a calendar that names every
+    booking) a listed stay the calendar does not have is dropped as canceled,
+    and the list only adds stays that start after that date.
+    """
     merged = dict(primary)
     for stay in secondary:
         known = merged.get(stay.id)
-        merged[stay.id] = stay if known is None else known.merged_with(stay)
+        if known is not None:
+            merged[stay.id] = known.merged_with(stay)
+        elif authoritative_until is None or stay.check_in_date > authoritative_until:
+            merged[stay.id] = stay
     return tuple(sorted(merged.values(), key=lambda item: (item.check_in, item.id)))
 
 

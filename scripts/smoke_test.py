@@ -31,6 +31,7 @@ from custom_components.guesty_owners.models import (
     ReviewSummary,
     Statement,
     Stay,
+    calendar_names_every_booking,
     merge_stays,
     stays_from_calendar,
 )
@@ -77,9 +78,20 @@ async def check_listing(client: GuestyOwnersClient, owner_id: str, raw: dict) ->
         ]
     from_calendar = stays_from_calendar(raw_days or [], listing)
     listed_ids = {stay.id for stay in listed}
+    trusted = raw_days is not None and calendar_names_every_booking(raw_days)
+    stays = merge_stays(
+        from_calendar, listed, authoritative_until=end if trusted else None
+    )
+    kept = {stay.id for stay in stays}
+    for stay in listed:
+        if stay.id not in kept:
+            print(
+                f"    dropped as canceled (listed but not on the calendar): "
+                f"{stay.check_in_date} to {stay.check_out_date}"
+            )
     snapshot = ListingSnapshot(
         listing=listing,
-        stays=merge_stays(from_calendar, listed),
+        stays=stays,
         days=tuple(
             day for item in raw_days or [] if (day := CalendarDay.from_api(item))
         ),

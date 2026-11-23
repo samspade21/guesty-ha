@@ -1,16 +1,20 @@
 """Diagnostics for the Guesty Owners Portal integration."""
 
 from dataclasses import asdict
+from datetime import date, time
 from typing import Any
 
 from homeassistant.components.diagnostics import async_redact_data
-from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
+from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant
 
 from .coordinator import GuestyOwnersConfigEntry
 from .models import ListingSnapshot
 
 TO_REDACT = {
+    # The portal address names the property manager, which narrows down who
+    # the owner is; diagnostics get attached to public issues.
+    CONF_HOST,
     CONF_PASSWORD,
     CONF_USERNAME,
     "address",
@@ -22,11 +26,17 @@ TO_REDACT = {
 
 
 def _plain(value: Any) -> Any:
-    """Turn tuples into lists, which is what redaction and JSON both expect."""
+    """Turn the data into what redaction and JSON both expect.
+
+    Tuples become lists, and dates and times become ISO strings (datetimes are
+    dates too); left alone they are written out as opaque objects.
+    """
     if isinstance(value, dict):
         return {key: _plain(item) for key, item in value.items()}
     if isinstance(value, list | tuple):
         return [_plain(item) for item in value]
+    if isinstance(value, date | time):
+        return value.isoformat()
     return value
 
 
