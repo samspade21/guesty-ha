@@ -362,3 +362,25 @@ async def test_section_answering_401_is_not_a_password_problem(
     assert hass.states.get("sensor.harbor_loft_guest_rating").state == STATE_UNKNOWN
     assert hass.states.get("sensor.harbor_loft_guest_reviews").state == STATE_UNKNOWN
     assert hass.states.get("binary_sensor.harbor_loft_occupied").state == "on"
+
+
+async def test_junk_listing_entries_are_skipped(
+    hass: HomeAssistant, config_entry: MockConfigEntry, portal: FakePortal
+) -> None:
+    """A listing without an ID, or with a bad timezone, must not break setup."""
+    portal.listings.extend(
+        [
+            {"nickname": "No ID"},
+            {"_id": "", "nickname": "Empty ID"},
+            {"_id": SECOND_LISTING, "nickname": "Odd Zone", "timezone": "Mars/Olympus"},
+        ]
+    )
+    config_entry.add_to_hass(hass)
+
+    assert await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert set(config_entry.runtime_data.stays.data) == {LISTING_ID, SECOND_LISTING}
+    assert hass.states.get("binary_sensor.harbor_loft_occupied").state == "on"
+    # An unknown timezone falls back to Home Assistant's own.
+    assert hass.states.get("binary_sensor.odd_zone_occupied") is not None

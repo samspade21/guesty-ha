@@ -7,6 +7,7 @@ are frozen so the coordinators can compare old and new data cheaply.
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field, fields, replace
 from datetime import UTC, date, datetime, time, timedelta, tzinfo
+import math
 from typing import Any, Final
 
 # Reservation statuses that mean somebody is, or will be, staying.
@@ -44,7 +45,12 @@ def _as_float(value: Any) -> float | None:
     """Return a number as float; the API uses ``"N/A"`` and null for hidden values."""
     if isinstance(value, bool) or not isinstance(value, int | float):
         return None
-    return float(value)
+    try:
+        number = float(value)
+    except OverflowError:
+        return None
+    # Python's JSON parser accepts NaN and Infinity; no sensor should show them.
+    return number if math.isfinite(number) else None
 
 
 def _as_int(value: Any) -> int | None:
@@ -73,7 +79,10 @@ def _as_instant(value: Any) -> datetime | None:
         return None
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=UTC)
-    return parsed.astimezone(UTC)
+    try:
+        return parsed.astimezone(UTC)
+    except OverflowError:
+        return None
 
 
 def _as_time(value: Any, default: time) -> time:
@@ -198,19 +207,27 @@ class Stay:
         tz = listing.tz
         check_in_date = _as_date(raw.get("checkInDateLocalized"))
         check_out_date = _as_date(raw.get("checkOutDateLocalized"))
-        if check_in_date is not None and check_out_date is not None:
-            arrival = _as_time(raw.get("plannedArrival"), listing.check_in_time)
-            departure = _as_time(raw.get("plannedDeparture"), listing.check_out_time)
-            check_in = datetime.combine(check_in_date, arrival, tz).astimezone(UTC)
-            check_out = datetime.combine(check_out_date, departure, tz).astimezone(UTC)
-        else:
-            instant_in = _as_instant(raw.get("checkIn"))
-            instant_out = _as_instant(raw.get("checkOut"))
-            if instant_in is None or instant_out is None:
-                return None
-            check_in, check_out = instant_in, instant_out
-            check_in_date = check_in.astimezone(tz).date()
-            check_out_date = check_out.astimezone(tz).date()
+        try:
+            if check_in_date is not None and check_out_date is not None:
+                arrival = _as_time(raw.get("plannedArrival"), listing.check_in_time)
+                departure = _as_time(
+                    raw.get("plannedDeparture"), listing.check_out_time
+                )
+                check_in = datetime.combine(check_in_date, arrival, tz).astimezone(UTC)
+                check_out = datetime.combine(check_out_date, departure, tz).astimezone(
+                    UTC
+                )
+            else:
+                instant_in = _as_instant(raw.get("checkIn"))
+                instant_out = _as_instant(raw.get("checkOut"))
+                if instant_in is None or instant_out is None:
+                    return None
+                check_in, check_out = instant_in, instant_out
+                check_in_date = check_in.astimezone(tz).date()
+                check_out_date = check_out.astimezone(tz).date()
+        except OverflowError:
+            # A date at the very edge of the calendar cannot change timezone.
+            return None
         if check_out <= check_in:
             return None
 
@@ -477,18 +494,18 @@ class PeriodMetrics:
         for box in boxes if isinstance(boxes, list) else []:
             if isinstance(box, Mapping) and isinstance(box.get("title"), str):
                 tiles[box["title"]] = _as_float(box.get("amount"))
+        fraction = _as_float(occupancy)
+        nights = _as_float(booked_nights)
         return cls(
             owner_revenue=tiles.get("OWNER_REVENUE"),
             net_rental_income=tiles.get("NET_RENTAL_INCOME"),
             occupancy=(
-                round(occupancy * 100, 2)
-                if occupancy is not None
+                round(fraction * 100, 2)
+                if fraction is not None
                 else tiles.get("OCCUPANCY")
             ),
             booked_nights=_as_int(
-                booked_nights
-                if booked_nights is not None
-                else tiles.get("BOOKED_NIGHTS")
+                nights if nights is not None else tiles.get("BOOKED_NIGHTS")
             ),
             average_nightly_rate=tiles.get("AVG_NIGHTLY_RATE"),
             currency=_as_str(raw.get("currency")),
@@ -515,6 +532,8 @@ class ReviewSummary:
             try:
                 rating = float(stars)
             except TypeError, ValueError:
+                continue
+            if not math.isfinite(rating):
                 continue
             number = _as_int(amount) or 0
             count += number

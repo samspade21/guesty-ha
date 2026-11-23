@@ -10,6 +10,7 @@ import asyncio
 from datetime import date
 import json
 import logging
+import math
 import re
 from typing import Any, Final
 
@@ -374,7 +375,11 @@ class GuestyOwnersClient:
         value = rows[0].get(key)
         if isinstance(value, bool) or not isinstance(value, int | float):
             return None
-        return float(value)
+        try:
+            number = float(value)
+        except OverflowError:
+            return None
+        return number if math.isfinite(number) else None
 
     async def async_get_occupancy(
         self, listing_id: str, owner_id: str, start: date, end: date

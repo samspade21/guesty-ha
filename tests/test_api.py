@@ -161,6 +161,11 @@ async def test_period_figures(hass: HomeAssistant, portal: FakePortal) -> None:
     assert await client.async_get_occupancy(*period) is None
     assert await client.async_get_booked_nights(*period) is None
 
+    portal.occupancy = {"data": [{"occupancy": float("nan")}]}
+    portal.booked_nights = {"data": [{"bookedNights": float("inf")}]}
+    assert await client.async_get_occupancy(*period) is None
+    assert await client.async_get_booked_nights(*period) is None
+
 
 async def test_portal_meta(hass: HomeAssistant, portal: FakePortal) -> None:
     meta = await make_client(hass).async_get_portal_meta()
