@@ -122,7 +122,8 @@
         "unit_of_measurement": "stays"
       },
       "booked_nights_next_30_days": {
-        "name": "Booked nights next 30 days"
+        "name": "Booked nights next 30 days",
+        "unit_of_measurement": "nights"
       },
       "availability": {
         "name": "Availability tonight",
@@ -136,7 +137,8 @@
         "name": "Nightly rate"
       },
       "minimum_nights": {
-        "name": "Minimum nights"
+        "name": "Minimum nights",
+        "unit_of_measurement": "nights"
       },
       "owner_revenue_this_month": {
         "name": "Owner revenue this month"
@@ -148,7 +150,8 @@
         "name": "Occupancy rate this month"
       },
       "booked_nights_this_month": {
-        "name": "Booked nights this month"
+        "name": "Booked nights this month",
+        "unit_of_measurement": "nights"
       },
       "average_nightly_rate_this_month": {
         "name": "Average nightly rate this month"
@@ -163,7 +166,8 @@
         "name": "Occupancy rate this year"
       },
       "booked_nights_this_year": {
-        "name": "Booked nights this year"
+        "name": "Booked nights this year",
+        "unit_of_measurement": "nights"
       },
       "average_nightly_rate_this_year": {
         "name": "Average nightly rate this year"

@@ -66,6 +66,10 @@ async def test_stay_sensors(hass: HomeAssistant, setup_entry: MockConfigEntry) -
         "USD"
     )
     assert state(hass, f"sensor.{HOME}_minimum_nights") == "3"
+    # Night counts read as nights, not as a duration in days.
+    for key in ("minimum_nights", "booked_nights_next_30_days"):
+        unit = attributes(hass, f"sensor.{HOME}_{key}")["unit_of_measurement"]
+        assert unit == "nights"
 
 
 async def test_stats_sensors(hass: HomeAssistant, setup_entry: MockConfigEntry) -> None:
@@ -76,6 +80,8 @@ async def test_stats_sensors(hass: HomeAssistant, setup_entry: MockConfigEntry) 
     # These two come from the service the portal's Analytics page reads.
     assert state(hass, f"sensor.{HOME}_occupancy_rate_this_month") == "35.0"
     assert state(hass, f"sensor.{HOME}_booked_nights_this_month") == "64"
+    nights = attributes(hass, f"sensor.{HOME}_booked_nights_this_month")
+    assert nights["unit_of_measurement"] == "nights"
     assert state(hass, f"sensor.{HOME}_average_nightly_rate_this_month") == "185.25"
     assert state(hass, f"sensor.{HOME}_guest_rating") == "4.65"
     assert state(hass, f"sensor.{HOME}_guest_reviews") == "20"

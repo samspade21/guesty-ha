@@ -10,5 +10,5 @@
   "issue_tracker": "https://github.com/samspade21/guesty-ha/issues",
   "loggers": ["custom_components.guesty_owners"],
   "requirements": [],
-  "version": "0.1.0"
+  "version": "0.1.1"
 }

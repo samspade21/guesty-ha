@@ -11,7 +11,7 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import PERCENTAGE, EntityCategory, UnitOfTime
+from homeassistant.const import PERCENTAGE, EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.typing import StateType
@@ -121,7 +121,6 @@ STAY_SENSORS: tuple[StaySensorDescription, ...] = (
     StaySensorDescription(
         key="booked_nights_next_30_days",
         translation_key="booked_nights_next_30_days",
-        native_unit_of_measurement=UnitOfTime.DAYS,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda snapshot, now: snapshot.booked_nights(
             now, BOOKED_NIGHTS_WINDOW_DAYS
@@ -149,7 +148,6 @@ STAY_SENSORS: tuple[StaySensorDescription, ...] = (
     StaySensorDescription(
         key="minimum_nights",
         translation_key="minimum_nights",
-        native_unit_of_measurement=UnitOfTime.DAYS,
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda snapshot, now: (
             day.min_nights if (day := snapshot.tonight(now)) else None
@@ -199,7 +197,6 @@ def _metric_sensors(
         StatsSensorDescription(
             key=f"booked_nights_{period}",
             translation_key=f"booked_nights_{period}",
-            native_unit_of_measurement=UnitOfTime.DAYS,
             state_class=SensorStateClass.MEASUREMENT,
             value_fn=value("booked_nights"),
         ),
