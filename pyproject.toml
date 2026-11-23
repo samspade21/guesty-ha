@@ -1,0 +1,70 @@
+[project]
+name = "guesty-ha"
+version = "0.1.0"
+description = "Home Assistant integration for the Guesty Owners Portal"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.14.2"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "--cov=custom_components.guesty_owners --cov-report=term-missing"
+
+[tool.coverage.report]
+exclude_also = ["if TYPE_CHECKING:"]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+  "A",     # shadowing builtins
+  "ASYNC", # async pitfalls
+  "B",     # bugbear
+  "C4",    # comprehensions
+  "D",     # docstrings
+  "E",
+  "F",
+  "G",     # logging format
+  "I",     # import order
+  "LOG",
+  "N",     # naming
+  "PERF",
+  "PIE",
+  "PL",    # pylint
+  "PT",    # pytest style
+  "RET",
+  "RUF",
+  "S",     # security
+  "SIM",
+  "T20",   # no print
+  "TC",    # type-checking imports
+  "TID",
+  "UP",
+  "W",
+]
+ignore = [
+  "D203",    # conflicts with D211
+  "D213",    # conflicts with D212
+  "E501",    # the formatter owns line length
+  "PLR0911", # early returns read fine in validation code
+  "PLR0913", # entity constructors take what Home Assistant passes
+  "PLR0917",
+  "PLR2004", # HTTP status codes read fine as numbers
+  "TC001",   # Home Assistant resolves annotations at runtime in places
+  "TC002",
+  "TC003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D", "S101", "S105", "S106", "PLR0915", "ARG"]
+"scripts/*" = ["T20"]
+
+[tool.ruff.lint.isort]
+force-sort-within-sections = true
+combine-as-imports = true
+known-first-party = ["custom_components.guesty_owners"]

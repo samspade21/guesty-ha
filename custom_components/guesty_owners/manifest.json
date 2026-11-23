@@ -1,0 +1,14 @@
+{
+  "domain": "guesty_owners",
+  "name": "Guesty Owners Portal",
+  "categories": ["productivity_information.calendars_todos"],
+  "codeowners": ["@samspade21"],
+  "config_flow": true,
+  "documentation": "https://github.com/samspade21/guesty-ha",
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/samspade21/guesty-ha/issues",
+  "loggers": ["custom_components.guesty_owners"],
+  "requirements": [],
+  "version": "0.1.0"
+}

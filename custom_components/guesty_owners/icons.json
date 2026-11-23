@@ -1,0 +1,85 @@
+{
+  "entity": {
+    "binary_sensor": {
+      "owner_stay": {
+        "default": "mdi:home-account"
+      },
+      "check_in_today": {
+        "default": "mdi:login"
+      },
+      "check_out_today": {
+        "default": "mdi:logout"
+      },
+      "turnover_today": {
+        "default": "mdi:broom"
+      }
+    },
+    "calendar": {
+      "reservations": {
+        "default": "mdi:calendar-account"
+      }
+    },
+    "event": {
+      "reservation": {
+        "default": "mdi:calendar-alert"
+      }
+    },
+    "sensor": {
+      "occupancy": {
+        "default": "mdi:home-outline",
+        "state": {
+          "guest": "mdi:home-account",
+          "owner": "mdi:home-heart"
+        }
+      },
+      "next_check_in": {
+        "default": "mdi:login"
+      },
+      "next_check_out": {
+        "default": "mdi:logout"
+      },
+      "upcoming_stays": {
+        "default": "mdi:calendar-multiple"
+      },
+      "booked_nights_next_30_days": {
+        "default": "mdi:weather-night"
+      },
+      "availability": {
+        "default": "mdi:calendar-check"
+      },
+      "minimum_nights": {
+        "default": "mdi:weather-night"
+      },
+      "occupancy_rate_this_month": {
+        "default": "mdi:percent"
+      },
+      "booked_nights_this_month": {
+        "default": "mdi:weather-night"
+      },
+      "occupancy_rate_this_year": {
+        "default": "mdi:percent"
+      },
+      "booked_nights_this_year": {
+        "default": "mdi:weather-night"
+      },
+      "rating": {
+        "default": "mdi:star"
+      },
+      "reviews": {
+        "default": "mdi:comment-text-multiple"
+      },
+      "latest_review": {
+        "default": "mdi:comment-clock"
+      },
+      "unread_messages": {
+        "default": "mdi:email-outline"
+      },
+      "statement_period_end": {
+        "default": "mdi:calendar-end"
+      },
+      "statement_payout_status": {
+        "default": "mdi:bank-transfer"
+      }
+    }
+  }
+}

@@ -1,0 +1,4 @@
+# pytest-homeassistant pins the matching Home Assistant release.
+pytest-homeassistant==2026.11.2
+pytest-cov==7.1.0
+ruff==0.17.6

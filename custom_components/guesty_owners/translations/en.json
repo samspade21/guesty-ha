@@ -1,0 +1,207 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Guesty Owners Portal",
+        "description": "Sign in with the same details you use on your property manager's owners portal. The integration only reads data.",
+        "data": {
+          "host": "Portal address",
+          "username": "Email",
+          "password": "Password"
+        },
+        "data_description": {
+          "host": "The address you open to reach the portal, such as acme.guestyowners.com. The name before .guestyowners.com is enough.",
+          "username": "The email address you sign in to the portal with.",
+          "password": "Your portal password. It is stored in Home Assistant so the integration can sign in again when the session expires."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Sign in again",
+        "description": "The portal {portal} no longer accepts the saved password for {username}.",
+        "data": {
+          "password": "Password"
+        },
+        "data_description": {
+          "password": "Your current portal password."
+        }
+      },
+      "reconfigure": {
+        "title": "Update portal login",
+        "description": "Change the portal address or the login. It must be the same owner account.",
+        "data": {
+          "host": "Portal address",
+          "username": "Email",
+          "password": "Password"
+        },
+        "data_description": {
+          "host": "The address you open to reach the portal, such as acme.guestyowners.com.",
+          "username": "The email address you sign in to the portal with.",
+          "password": "Your portal password."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not reach Guesty. Check your internet connection and try again.",
+      "invalid_auth": "The email or password is wrong.",
+      "invalid_host": "That does not look like a portal address.",
+      "portal_not_found": "No owners portal was found at that address.",
+      "unknown": "Guesty returned something unexpected. See the log for details."
+    },
+    "abort": {
+      "already_configured": "This owner account is already set up.",
+      "wrong_account": "Those details belong to a different owner account. Add it as a new entry instead."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Guesty Owners Portal options",
+        "data": {
+          "days_ahead": "Calendar days to read ahead"
+        },
+        "data_description": {
+          "days_ahead": "How many days of nightly rates and availability to read. Reservations are always listed a full year ahead."
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "occupied": {
+        "name": "Occupied"
+      },
+      "owner_stay": {
+        "name": "Owner stay"
+      },
+      "check_in_today": {
+        "name": "Check-in today"
+      },
+      "check_out_today": {
+        "name": "Check-out today"
+      },
+      "turnover_today": {
+        "name": "Turnover today"
+      }
+    },
+    "calendar": {
+      "reservations": {
+        "name": "Reservations"
+      }
+    },
+    "event": {
+      "reservation": {
+        "name": "Reservation",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "booked": "Booked",
+              "canceled": "Canceled",
+              "modified": "Modified"
+            }
+          }
+        }
+      }
+    },
+    "sensor": {
+      "occupancy": {
+        "name": "Occupancy",
+        "state": {
+          "vacant": "Vacant",
+          "guest": "Guest",
+          "owner": "Owner"
+        }
+      },
+      "next_check_in": {
+        "name": "Next check-in"
+      },
+      "next_check_out": {
+        "name": "Next check-out"
+      },
+      "upcoming_stays": {
+        "name": "Upcoming stays",
+        "unit_of_measurement": "stays"
+      },
+      "booked_nights_next_30_days": {
+        "name": "Booked nights next 30 days"
+      },
+      "availability": {
+        "name": "Availability tonight",
+        "state": {
+          "available": "Available",
+          "booked": "Booked",
+          "unavailable": "Blocked"
+        }
+      },
+      "nightly_rate": {
+        "name": "Nightly rate"
+      },
+      "minimum_nights": {
+        "name": "Minimum nights"
+      },
+      "owner_revenue_this_month": {
+        "name": "Owner revenue this month"
+      },
+      "net_rental_income_this_month": {
+        "name": "Net rental income this month"
+      },
+      "occupancy_rate_this_month": {
+        "name": "Occupancy rate this month"
+      },
+      "booked_nights_this_month": {
+        "name": "Booked nights this month"
+      },
+      "average_nightly_rate_this_month": {
+        "name": "Average nightly rate this month"
+      },
+      "owner_revenue_this_year": {
+        "name": "Owner revenue this year"
+      },
+      "net_rental_income_this_year": {
+        "name": "Net rental income this year"
+      },
+      "occupancy_rate_this_year": {
+        "name": "Occupancy rate this year"
+      },
+      "booked_nights_this_year": {
+        "name": "Booked nights this year"
+      },
+      "average_nightly_rate_this_year": {
+        "name": "Average nightly rate this year"
+      },
+      "rating": {
+        "name": "Guest rating"
+      },
+      "reviews": {
+        "name": "Guest reviews",
+        "unit_of_measurement": "reviews"
+      },
+      "latest_review": {
+        "name": "Latest review"
+      },
+      "unread_messages": {
+        "name": "Unread messages",
+        "unit_of_measurement": "messages"
+      },
+      "statement_due_to_owner": {
+        "name": "Statement due to owner"
+      },
+      "statement_ending_balance": {
+        "name": "Statement ending balance"
+      },
+      "statement_period_end": {
+        "name": "Statement period end"
+      },
+      "statement_payout_status": {
+        "name": "Statement payout status"
+      }
+    }
+  },
+  "exceptions": {
+    "auth_failed": {
+      "message": "The Guesty Owners Portal rejected the saved email or password."
+    },
+    "update_failed": {
+      "message": "Could not update from the Guesty Owners Portal: {error}"
+    }
+  }
+}
